@@ -1,0 +1,4 @@
+click>=8.1
+pydantic>=2.7
+rich>=13.7
+pytest>=8.3

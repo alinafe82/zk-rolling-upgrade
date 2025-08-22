@@ -1,0 +1,11 @@
+[project]
+name = "zk-rolling-upgrade"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.7",
+    "rich>=13.7"
+]
+[tool.pytest.ini_options]
+addopts = "-q"
