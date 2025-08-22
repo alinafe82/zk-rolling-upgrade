@@ -2,12 +2,14 @@ name: Python CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
