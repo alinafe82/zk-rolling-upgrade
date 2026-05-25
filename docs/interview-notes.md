@@ -29,6 +29,7 @@ run state.
 
 - Added tests for leader-last execution, health-check failure, and bad CLI node input.
 - Added node parsing validation and bounded concurrency input.
+- Added single-leader plan validation so invalid upgrade plans fail before orchestration.
 - Added production-readiness, security, runbook, and core design ADR docs.
 - Updated CI to run ruff as well as tests.
 

@@ -31,6 +31,7 @@ uv run python -m zk_upgrade.cli plan --cluster ds-zk --nodes zk-1,zk-2,zk-3 --ta
 - `zk_upgrade.health` is the local health-check interface; a real adapter would wrap `mntr`,
   four-letter-word commands, or a service discovery health API.
 - `zk_upgrade.cli` keeps command parsing outside the orchestration logic.
+- Plans require exactly one leader so invalid upgrade inputs fail before execution.
 
 See [docs/architecture.md](docs/architecture.md), [docs/runbook.md](docs/runbook.md), and
 [docs/production-readiness.md](docs/production-readiness.md) for operational details.
