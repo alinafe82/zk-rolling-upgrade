@@ -1,5 +1,6 @@
 import pytest
 from click.testing import CliRunner
+from pydantic import ValidationError
 
 from zk_upgrade.cli import cli
 from zk_upgrade.models import Node, Plan
@@ -61,3 +62,22 @@ def test_cli_rejects_empty_node_entries():
 
     assert result.exit_code != 0
     assert "empty entries" in result.output
+
+
+def test_plan_requires_single_leader():
+    with pytest.raises(ValidationError, match="exactly one leader"):
+        Plan(
+            cluster="ds-zk",
+            target_version="3.8.2",
+            nodes=[Node(name="zk-1"), Node(name="zk-2")],
+        )
+
+    with pytest.raises(ValidationError, match="exactly one leader"):
+        Plan(
+            cluster="ds-zk",
+            target_version="3.8.2",
+            nodes=[
+                Node(name="zk-1", role="leader"),
+                Node(name="zk-2", role="leader"),
+            ],
+        )
