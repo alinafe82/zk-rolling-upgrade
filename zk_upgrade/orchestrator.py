@@ -29,4 +29,7 @@ def rolling(plan: Plan, dry_run: bool = True) -> Iterable[str]:
         upgrade_node(node, plan.target_version, dry_run=dry_run)
         if not check_health(node):
             raise UpgradeError(f"{node.name} failed health checks post-upgrade")
+        if dry_run:
+            yield f"{node.name} health check passed (dry-run, current={node.version})"
+            continue
         yield f"{node.name} healthy on {node.version}"
