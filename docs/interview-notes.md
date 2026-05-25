@@ -25,6 +25,13 @@ run state.
 - Added local pytest import configuration so a fresh clone can run tests with `uv`.
 - Added architecture and ADR notes to make the scope explicit.
 
+## Fixes Made During Productionization
+
+- Added tests for leader-last execution, health-check failure, and bad CLI node input.
+- Added node parsing validation and bounded concurrency input.
+- Added production-readiness, security, runbook, and core design ADR docs.
+- Updated CI to run ruff as well as tests.
+
 ## Likely Questions
 
 **Why not upgrade nodes concurrently?**

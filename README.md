@@ -32,6 +32,9 @@ uv run python -m zk_upgrade.cli plan --cluster ds-zk --nodes zk-1,zk-2,zk-3 --ta
   four-letter-word commands, or a service discovery health API.
 - `zk_upgrade.cli` keeps command parsing outside the orchestration logic.
 
+See [docs/architecture.md](docs/architecture.md), [docs/runbook.md](docs/runbook.md), and
+[docs/production-readiness.md](docs/production-readiness.md) for operational details.
+
 ## Testing
 ```bash
 uv run --extra dev pytest
@@ -49,4 +52,5 @@ uv run --extra dev ruff check .
 - Persist upgrade state so a failed run can resume from the last healthy node.
 
 ## Interview Notes
-See [docs/interview-notes.md](docs/interview-notes.md).
+See [docs/interview-notes.md](docs/interview-notes.md) and
+[docs/security-notes.md](docs/security-notes.md).

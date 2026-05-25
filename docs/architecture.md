@@ -53,5 +53,6 @@ timeouts, audit logs, and operator approval for leader changes.
 
 ## Testing Strategy
 
-Tests cover the upgrade plan order and post-upgrade behavior. The next useful test layer would
-mock an unhealthy node and verify that later nodes are not touched after failure.
+Tests cover plan creation, leader-last order, CLI input validation, and unhealthy-node failure.
+The next useful layer would verify a real Zookeeper health adapter against a disposable
+ensemble or recorded health responses.
