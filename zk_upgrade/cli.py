@@ -1,15 +1,18 @@
 import click
 from rich.console import Console
 from rich.table import Table
+
 from .models import Node, Plan
 from .orchestrator import rolling
 
 console = Console()
 
+
 @click.group()
 def cli():
     "ZK rolling upgrade orchestrator (simulated)"
     pass
+
 
 @cli.command()
 @click.option("--cluster", required=True)
@@ -21,13 +24,22 @@ def plan(cluster, nodes, target_version, concurrency):
     for i, n in enumerate(nodes.split(",")):
         role = "leader" if i == 0 else "follower"
         node_list.append(Node(name=n, role=role))
-    p = Plan(cluster=cluster, target_version=target_version, nodes=node_list, concurrency=concurrency)
+    p = Plan(
+        cluster=cluster,
+        target_version=target_version,
+        nodes=node_list,
+        concurrency=concurrency,
+    )
 
     table = Table(title=f"Plan for {cluster}")
-    table.add_column("Node"); table.add_column("Role"); table.add_column("Current"); table.add_column("Target")
+    table.add_column("Node")
+    table.add_column("Role")
+    table.add_column("Current")
+    table.add_column("Target")
     for n in p.nodes:
         table.add_row(n.name, n.role, n.version, target_version)
     console.print(table)
+
 
 @cli.command()
 @click.option("--cluster", required=True)
@@ -42,6 +54,7 @@ def run(cluster, nodes, target_version, dry_run):
     p = Plan(cluster=cluster, target_version=target_version, nodes=node_list)
     for msg in rolling(p, dry_run=dry_run):
         console.log(msg)
+
 
 if __name__ == "__main__":
     cli()

@@ -1,9 +1,13 @@
-from typing import List, Iterable
+from collections.abc import Iterable
 from time import sleep
-from .models import Node, Plan
-from .health import check_health
 
-class UpgradeError(Exception): pass
+from .health import check_health
+from .models import Node, Plan
+
+
+class UpgradeError(Exception):
+    pass
+
 
 def upgrade_node(node: Node, target: str, dry_run: bool = True) -> None:
     if dry_run:
@@ -12,6 +16,7 @@ def upgrade_node(node: Node, target: str, dry_run: bool = True) -> None:
     sleep(0.5)
     node.version = target
     node.healthy = True
+
 
 def rolling(plan: Plan, dry_run: bool = True) -> Iterable[str]:
     # leader last

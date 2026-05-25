@@ -1,5 +1,7 @@
 from time import sleep
+
 from .models import Node
+
 
 def check_health(node: Node, timeout: int = 30) -> bool:
     # Simulated 'mntr' health — in reality, call zk_mntr and parse response.

@@ -1,5 +1,7 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
-from typing import List, Literal
+
 
 class Node(BaseModel):
     name: str
@@ -7,8 +9,9 @@ class Node(BaseModel):
     role: Literal["leader", "follower"] = "follower"
     healthy: bool = True
 
+
 class Plan(BaseModel):
     cluster: str
     target_version: str
-    nodes: List[Node]
+    nodes: list[Node]
     concurrency: int = Field(1, ge=1, le=3)
