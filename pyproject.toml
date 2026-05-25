@@ -7,5 +7,19 @@ dependencies = [
     "pydantic>=2.7",
     "rich>=13.7"
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
 [tool.pytest.ini_options]
 addopts = "-q"
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

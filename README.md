@@ -1,16 +1,13 @@
 # zk-rolling-upgrade
-> Simulated zero-downtime Zookeeper rolling upgrade orchestrator
+Simulated Zookeeper rolling upgrade planner and runner.
 
-This project showcases a Python CLI that performs a **rolling upgrade** of Zookeeper nodes with health checks,
-dry-run mode, concurrency control, and post-upgrade validation — modeled after enterprise patterns.
+This repo models the control flow behind a rolling Zookeeper upgrade: plan node order,
+upgrade followers before leaders, run health checks after each node, and keep a dry-run mode
+for review before changing a cluster.
 
-## Highlights
-- Rolling upgrade strategy with leader awareness
-- Health checks via `mntr`-like mock interface
-- `--dry-run` and `--concurrency` knobs
-- Structured logging and graceful error handling
-- Unit tests and typed models (`pydantic`)
-- Designed for extension to real clusters
+It is intentionally a simulator. It does not connect to a real Zookeeper ensemble or execute
+package-manager commands. The value is in the orchestration shape, failure boundaries, and
+testable upgrade plan.
 
 ## Quickstart
 ```bash
@@ -20,3 +17,41 @@ pytest -q
 python -m zk_upgrade.cli plan --cluster ds-zk --nodes zk-1,zk-2,zk-3 --target 3.8.2
 python -m zk_upgrade.cli run  --cluster ds-zk --nodes zk-1,zk-2,zk-3 --target 3.8.2 --dry-run
 ```
+
+With `uv`:
+
+```bash
+uv run --extra dev pytest
+uv run python -m zk_upgrade.cli plan --cluster ds-zk --nodes zk-1,zk-2,zk-3 --target 3.8.2
+```
+
+## Design Notes
+- `zk_upgrade.models` defines the cluster and upgrade plan.
+- `zk_upgrade.orchestrator` owns upgrade ordering and post-step health validation.
+- `zk_upgrade.health` is the local health-check interface; a real adapter would wrap `mntr`,
+  four-letter-word commands, or a service discovery health API.
+- `zk_upgrade.cli` keeps command parsing outside the orchestration logic.
+- Plans require exactly one leader so invalid upgrade inputs fail before execution.
+
+See [docs/architecture.md](docs/architecture.md), [docs/runbook.md](docs/runbook.md), and
+[docs/production-readiness.md](docs/production-readiness.md) for operational details.
+
+## Testing
+```bash
+uv run --extra dev pytest
+uv run --extra dev ruff check .
+```
+
+## Limitations
+- The upgrade action is simulated.
+- There is no quorum math yet beyond leader-last ordering.
+- Concurrency is represented in the interface but not wired into parallel execution.
+
+## Future Improvements
+- Add a real Zookeeper health adapter.
+- Add quorum-aware batch planning.
+- Persist upgrade state so a failed run can resume from the last healthy node.
+
+## Interview Notes
+See [docs/interview-notes.md](docs/interview-notes.md) and
+[docs/security-notes.md](docs/security-notes.md).
