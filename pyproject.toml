@@ -3,7 +3,7 @@ name = "zk-rolling-upgrade"
 version = "0.1.0"
 requires-python = ">=3.9"
 dependencies = [
-    "click>=8.1",
+    "click>=8.1.8",
     "pydantic>=2.13.4",
     "rich>=13.7"
 ]
