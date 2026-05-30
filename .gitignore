@@ -11,3 +11,6 @@ build/
 .env
 .env.*
 !.env.example
+
+# Local architecture-agent context. Do not publish.
+.specs/
