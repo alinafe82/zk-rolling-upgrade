@@ -64,6 +64,25 @@ def test_cli_rejects_empty_node_entries():
     assert "empty entries" in result.output
 
 
+def test_dry_run_does_not_mutate_node_versions():
+    nodes = [
+        Node(name="zk-1", role="leader"),
+        Node(name="zk-2", role="follower"),
+        Node(name="zk-3", role="follower"),
+    ]
+    starting_versions = {node.name: node.version for node in nodes}
+    plan = Plan(cluster="ds-zk", target_version="3.8.2", nodes=nodes)
+
+    # Consume the generator under dry_run. No node should have its
+    # version field flipped to the target.
+    list(rolling(plan, dry_run=True))
+
+    for node in plan.nodes:
+        assert node.version == starting_versions[node.name], (
+            f"{node.name} version changed under dry_run"
+        )
+
+
 def test_plan_requires_single_leader():
     with pytest.raises(ValidationError, match="exactly one leader"):
         Plan(
