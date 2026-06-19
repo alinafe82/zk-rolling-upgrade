@@ -39,7 +39,7 @@ run state.
 Concurrency is risky for coordination systems unless the planner understands quorum. I would
 add concurrency only after the planner can prove the cluster remains healthy after each batch.
 
-**What would make this production-ready?**
+**What would need to change before live operations?**
 A real health adapter, persistent state, audited execution, explicit rollback behavior, and
 integration tests against a disposable Zookeeper cluster.
 
