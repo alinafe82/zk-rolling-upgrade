@@ -1,16 +1,16 @@
 [project]
 name = "zk-rolling-upgrade"
 version = "0.1.0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    "click>=8.1.8",
+    "click>=8.4.2",
     "pydantic>=2.13.4",
     "rich>=15.0.0"
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.4.2",
+    "pytest>=9.1.1",
     "ruff>=0.16.0",
 ]
 
