@@ -3,9 +3,20 @@ from rich.console import Console
 from rich.table import Table
 
 from .models import Node, Plan
-from .orchestrator import rolling
+from .operations import SimulatedNodeOperator
+from .orchestrator import UpgradeEvent, rolling
 
 console = Console()
+
+
+def format_event(event: UpgradeEvent) -> str:
+    if event.stage == "draining":
+        return f"Draining {event.node} (role={event.role})"
+    if event.stage == "upgrading":
+        return f"Upgrading {event.node} -> {event.target_version}"
+    if event.dry_run:
+        return f"{event.node} health check passed (dry-run, current={event.current_version})"
+    return f"{event.node} healthy on {event.current_version}"
 
 
 def parse_nodes(value: str) -> list[Node]:
@@ -57,8 +68,9 @@ def plan(cluster, nodes, target_version, concurrency):
 def run(cluster, nodes, target_version, dry_run):
     node_list = parse_nodes(nodes)
     p = Plan(cluster=cluster, target_version=target_version, nodes=node_list)
-    for msg in rolling(p, dry_run=dry_run):
-        console.log(msg)
+    operator = SimulatedNodeOperator()
+    for event in rolling(p, operator, dry_run=dry_run):
+        console.log(format_event(event))
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 Rolling-upgrade planner and runner for a Zookeeper ensemble. The control flow models the part that matters: order the nodes, drain each one in turn, run a post-step health check, and stop the rollout the moment a node fails its check.
 
-The default health-check adapter is local, so the repo can be reviewed end-to-end without a real Zookeeper cluster. A production adapter would wrap `mntr`, `ruok`, `stat`, or a service-discovery health API. The orchestrator and the adapter interface stay the same.
+The default node-operations adapter is local, so the repo can be reviewed end-to-end without a real Zookeeper cluster. A production adapter would combine the real upgrade action with `mntr`, `ruok`, `stat`, or a service-discovery health check. The runner and its adapter interface stay the same.
 
 ## Why leader-last matters
 
@@ -30,24 +30,25 @@ uv run python -m zk_upgrade.cli plan --cluster ds-zk --nodes zk-1,zk-2,zk-3 --ta
 ## Control flow
 
 - `zk_upgrade.models.Node` and `Plan` carry the schema. `Plan.require_single_leader` rejects a plan with zero or two-plus leaders before any upgrade step runs.
-- `zk_upgrade.orchestrator.rolling` orders followers first, then the leader. Between nodes it calls `health.check_health`. The first failed check raises `UpgradeError` and stops the generator.
-- `zk_upgrade.health.check_health` is the local adapter. The interface is what a real adapter would replace.
-- `zk_upgrade.cli` handles input parsing, including rejecting empty node entries.
+- `zk_upgrade.orchestrator.rolling` orders followers first, then the leader. It emits structured `UpgradeEvent` values and stops with `UpgradeError` on the first failed health gate.
+- `zk_upgrade.operations.NodeOperator` is the node-operations seam. The runner knows only its `upgrade` and `wait_until_healthy` interface.
+- `zk_upgrade.operations.SimulatedNodeOperator` is the local adapter. Tests supply an in-memory recording adapter, so failure paths never wait on real polling.
+- `zk_upgrade.cli` handles input parsing and renders structured events for operators.
 
 Design notes: [docs/architecture.md](docs/architecture.md). Operator flow: [docs/runbook.md](docs/runbook.md).
 
 ## What the tests prove
 
-- followers run before the leader, in order.
-- a failed health check raises `UpgradeError` and the rollout stops at that node.
+- followers reach the node-operations adapter before the leader, in order.
+- a failed adapter health check raises `UpgradeError` and no later node reaches the adapter.
+- the CLI renders structured runner events through the simulated adapter.
 - empty entries in the CLI node list (`zk-1,,zk-3`) are rejected up front.
 - a plan with zero or multiple leaders fails at construction time.
 - `dry_run=True` does not mutate node versions (added in this pass).
 
 ## Adapter work left before this could touch a real cluster
 
-- A `mntr`/`ruok`/`stat` health adapter implementing the `check_health` interface.
-- A real upgrade action: stop the service, install the target package, start the service, wait for the four-letter-word response to return `imok`.
+- A production `NodeOperator` adapter that stops the service, installs the target package, starts the service, and waits for `mntr`/`ruok`/`stat` to report healthy.
 - Quorum-aware batch planning when the ensemble has five or more nodes. Today the orchestrator upgrades one node at a time. Anything larger than three nodes needs explicit batch math (`floor((n-1)/2)` per batch keeps quorum during the rollout).
 - Persistent state so a partial run can resume from the last healthy node.
 
