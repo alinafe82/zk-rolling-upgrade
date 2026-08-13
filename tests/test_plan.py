@@ -132,6 +132,21 @@ def test_dry_run_does_not_mutate_node_versions():
         )
 
 
+def test_live_success_events_report_target_without_model_mutation():
+    nodes = [
+        Node(name="zk-1", role="leader"),
+        Node(name="zk-2", role="follower"),
+    ]
+    plan = Plan(cluster="ds-zk", target_version="3.8.2", nodes=nodes)
+    operator = RecordingNodeOperator()
+
+    events = list(rolling(plan, operator, dry_run=False))
+
+    healthy_events = [event for event in events if event.stage == "healthy"]
+    assert [event.current_version for event in healthy_events] == ["3.8.2", "3.8.2"]
+    assert [node.version for node in plan.nodes] == ["3.8.0", "3.8.0"]
+
+
 def test_plan_requires_single_leader():
     with pytest.raises(ValidationError, match="exactly one leader"):
         Plan(

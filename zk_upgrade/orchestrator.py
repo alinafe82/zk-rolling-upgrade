@@ -23,12 +23,19 @@ class UpgradeEvent:
     dry_run: bool
 
 
-def _event(stage: UpgradeStage, node: Node, plan: Plan, dry_run: bool) -> UpgradeEvent:
+def _event(
+    stage: UpgradeStage,
+    node: Node,
+    plan: Plan,
+    dry_run: bool,
+    *,
+    current_version: str | None = None,
+) -> UpgradeEvent:
     return UpgradeEvent(
         stage=stage,
         node=node.name,
         role=node.role,
-        current_version=node.version,
+        current_version=node.version if current_version is None else current_version,
         target_version=plan.target_version,
         dry_run=dry_run,
     )
@@ -49,4 +56,11 @@ def rolling(
         operator.upgrade(node, plan.target_version, dry_run=dry_run)
         if not operator.wait_until_healthy(node):
             raise UpgradeError(f"{node.name} failed health checks post-upgrade")
-        yield _event("healthy", node, plan, dry_run)
+        installed_version = node.version if dry_run else plan.target_version
+        yield _event(
+            "healthy",
+            node,
+            plan,
+            dry_run,
+            current_version=installed_version,
+        )
