@@ -164,3 +164,31 @@ def test_plan_requires_single_leader():
                 Node(name="zk-2", role="leader"),
             ],
         )
+
+
+def test_plan_rejects_duplicate_node_names():
+    with pytest.raises(ValidationError, match="duplicate node names: zk-1"):
+        Plan(
+            cluster="ds-zk",
+            target_version="3.8.2",
+            nodes=[
+                Node(name="zk-1", role="leader"),
+                Node(name="zk-1", role="follower"),
+            ],
+        )
+
+
+def test_models_normalize_names_and_reject_blank_identifiers():
+    plan = Plan(
+        cluster="  ds-zk  ",
+        target_version="  3.8.2  ",
+        nodes=[Node(name="  zk-1  ", version="  3.8.0  ", role="leader")],
+    )
+
+    assert plan.cluster == "ds-zk"
+    assert plan.target_version == "3.8.2"
+    assert plan.nodes[0].name == "zk-1"
+    assert plan.nodes[0].version == "3.8.0"
+
+    with pytest.raises(ValidationError, match="must not be blank"):
+        Node(name="   ")
