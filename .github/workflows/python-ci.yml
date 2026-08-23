@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -15,62 +16,54 @@ concurrency:
 
 jobs:
   quality:
+    name: Lint and package
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@e58605a9b6da7c637471fab8847a5e5a6b8df081
+        with:
+          enable-cache: true
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: |
-            pyproject.toml
-            uv.lock
-      - name: Install quality and build dependencies
-        run: python -m pip install --disable-pip-version-check -e ".[dev]" build
-      - name: Verify dependency consistency
-        run: python -m pip check
+
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras
+
       - name: Lint
-        run: ruff check .
+        run: uv run ruff check .
+
       - name: Check formatting
-        run: ruff format --check .
-      - name: Build distribution
-        run: python -m build
+        run: uv run ruff format --check .
+
+      - name: Build distributions
+        run: uv build
 
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: |
-            pyproject.toml
-            uv.lock
-      - name: Install test dependencies
-        run: python -m pip install --disable-pip-version-check -e ".[dev]"
-      - name: Run tests
-        run: pytest
-
-  compatibility:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.13"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: |
-            pyproject.toml
-            uv.lock
-      - name: Install test dependencies
-        run: python -m pip install --disable-pip-version-check -e ".[dev]"
-      - name: Run compatibility tests
-        run: pytest
+          persist-credentials: false
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@e58605a9b6da7c637471fab8847a5e5a6b8df081
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras
+
+      - name: Run tests
+        run: uv run pytest
