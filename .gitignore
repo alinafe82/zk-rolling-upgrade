@@ -22,12 +22,19 @@ build/
 **/.codex/environments/
 .superdesign/
 .scratch/
-.serena/
-.aider*
+.serena/*
+!.serena/project.yml
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v*/
 .claude/settings.local.json
 **/.claude/settings.local.json
-.continue/
-.windsurf/
+.continue/*
+!.continue/rules/
+!.continue/config.yaml
+!.continue/config.json
+.windsurf/*
+!.windsurf/rules/
 # Local environment and secrets
 .envrc.local
 *.local
@@ -35,9 +42,6 @@ build/
 *.key
 *.p12
 *.pfx
-*.crt
-*.cer
-*.csr
 *.jks
 *.keystore
 *.mobileprovision
