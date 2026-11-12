@@ -1,5 +1,5 @@
 # Direct versions match uv.lock; use uv sync --locked --extra dev for the full lock.
 click==8.5.0
-pydantic==2.14.1
+pydantic==2.14.3
 rich==15.0.0
 pytest==9.1.1
